@@ -27,13 +27,18 @@ Projekt serwera IOT który nasłuchuje wiadomości MQTT z urządzeń ESP32 i zap
 ```bash
 pip install -r requirements.txt
 ```
-
-2. Upewnij się, że masz uruchomiony broker MQTT (domyślnie oczekiwany na `10.219.44.41:1883`):
+2. Stwórz na pulpicie plik `mosquitto1.conf`, zawartość:
+```
+listener 1883 0.0.0.0
+allow_anonymous true
+```
+Przeciągnij go do ścieżki gdzie Mosquitto było ściągnięte. (Trzeba kliknąć uprawnienia administratora komputera.)
+4. Upewnij się, że masz uruchomiony broker MQTT (domyślnie oczekiwany na `10.219.44.41:1883`):
 ```bash
 # Jeśli masz Mosquitto:
 cd C:\Program Files\mosquitto\
 # Lub inna ścieżka gdzie było ściągnięte
-mosquitto -v
+mosquitto -c mosquitto1.conf -v
 ```
 Zmień w kodzie ip na to na którym chodzi twój serwer Mosquitto.
 
