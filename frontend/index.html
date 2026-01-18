@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOT Server - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IOT Server Dashboard</h1>
+            <p class="subtitle">Monitorowanie urządzeń ESP32</p>
+        </header>
+
+        <div class="content">
+            <section class="devices-section">
+                <h2>Urządzenia</h2>
+                <button id="refreshDevices" class="btn btn-primary">Odśwież listę</button>
+                <div id="devicesList" class="devices-grid">
+                    <p class="loading">Ładowanie urządzeń...</p>
+                </div>
+            </section>
+
+            <section class="alerts-section">
+                <h2>Wyślij Alert</h2>
+                <div class="alert-form">
+                    <div class="form-group">
+                        <label for="deviceMac">MAC Address urządzenia:</label>
+                        <input type="text" id="deviceMac" placeholder="np. aabbccddeeff" pattern="[a-fA-F0-9]{12}">
+                    </div>
+                    <div class="form-group">
+                        <label for="alertMessage">Wiadomość alertu:</label>
+                        <input type="text" id="alertMessage" value="BUZZ" placeholder="BUZZ">
+                    </div>
+                    <button id="sendAlert" class="btn btn-danger">Wyślij Alert</button>
+                </div>
+                <div id="alertStatus" class="status-message"></div>
+            </section>
+
+            <section class="measurements-section" id="measurementsSection" style="display: none;">
+                <h2>Pomiary</h2>
+                <div class="measurements-controls">
+                    <div class="form-group">
+                        <label for="sensorType">Typ sensora:</label>
+                        <select id="sensorType">
+                            <option value="adxl">ADXL</option>
+                            <option value="max_normal">MAX_NORMAL</option>
+                            <option value="max_profile">MAX_PROFILE</option>
+                        </select>
+                    </div>
+                    <button id="loadMeasurements" class="btn btn-primary">Załaduj pomiary</button>
+                </div>
+                <div id="measurementsList" class="measurements-table">
+                    <p>Wybierz urządzenie, aby zobaczyć pomiary</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
