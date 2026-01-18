@@ -138,7 +138,7 @@ Parametry:
 
 - **users**: Użytkownicy systemu
 - **devices**: Urządzenia ESP32 (związane z użytkownikami)
-- **measurements**: Pomiary z sensora ADXL
+- **measurements**: Pomiary z sensorów
 
 
 ## Konfiguracja (.env)
