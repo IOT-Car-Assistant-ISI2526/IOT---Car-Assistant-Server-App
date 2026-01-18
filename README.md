@@ -46,7 +46,7 @@ Zmień w kodzie ip na to na którym chodzi twój serwer Mosquitto.
 
 1. Uruchom serwer (backend + MQTT listener + API):
 ```bash
-python backend/main.py
+python backend/run.py
 ```
 
 Serwer uruchomi się na porcie 5000 (API) i zacznie nasłuchiwać wiadomości MQTT.
@@ -72,58 +72,120 @@ Format wiadomości:
 
 ## API Endpoints
 
-### GET `/api/devices`
-Pobiera listę wszystkich urządzeń.
+Wszystkie endpointy (poza sekcją uwierzytelniania) wymagają nagłówka:
+`Authorization: Bearer <twoj_token_jwt>`
 
-### GET `/api/devices/{device_id}/measurements?sensor_type={type}&limit={limit}`
-Pobiera pomiary dla danego urządzenia.
+### Uwierzytelnianie:
+
+#### `POST /api/auth/register`
+Rejestracja nowego użytkownika.
+
+**Body:**
+```json
+{
+  "username": "login",
+  "password": "password"
+}
+```
+
+#### `POST /api/auth/login`
+Logowanie. Zwraca token JWT, który jest wymagany do zapytań o urządzenia i pomiary.
+
+**Body:**
+```json
+{
+  "username": "login",
+  "password": "password"
+}
+```
+
+### Urządzenia:
+
+#### `GET /api/devices/`
+Pobiera listę urządzeń przypisanych do zalogowanego użytkownika.
+
+#### `POST /api/devices/claim`
+Przypisuje urządzenie do konta użytkownika (jeśli jest wolne).
+
+**Body:**
+```json
+{
+  "mac_address": "AA:BB:CC:DD:EE:FF"
+}
+```
+
+#### `DELETE /api/devices/{mac_address}`
+Usuwa urządzenie z konta. Urządzenie staje się wolne i traci powiązanie z historią właściciela.
+
+### Pomiary:
+
+#### `GET /api/devices/{mac_address}/measurements`
+Pobiera historię pomiarów. Zwraca tylko te dane, które zostały zarejestrowane podczas posiadania urządzenia przez obecnego użytkownika.
 
 Parametry:
 - `sensor_type`: `adxl`, `max_normal`, lub `max_profile` (domyślnie: `adxl`)
 - `limit`: Liczba pomiarów do pobrania (domyślnie: 100)
 
-### POST `/api/devices/send-alert`
-Wysyła alert do urządzenia.
+#### `GET /api/devices/{mac_address}/measurements`
+Pobiera historię pomiarów. Zwraca tylko te dane, które zostały zarejestrowane podczas posiadania urządzenia przez obecnego użytkownika.
 
-Body:
-```json
-{
-  "mac_address": "aabbccddeeff",
-  "message": "BUZZ"
-}
-```
+Parametry:
+- `sensor_type`: `adxl`, `max_normal`, lub `max_profile` (domyślnie: `adxl`)
+- `limit`: Liczba pomiarów do pobrania (domyślnie: 100)
 
-Topic alertu: `user/{mac_address}/alerts`
 
 ## Struktura bazy danych
 
 - **users**: Użytkownicy systemu
 - **devices**: Urządzenia ESP32 (związane z użytkownikami)
-- **measurements_adxl**: Pomiary z sensora ADXL
-- **measurements_max_normal**: Pomiary z sensora MAX_NORMAL
-- **measurements_max_profile**: Pomiary z sensora MAX_PROFILE
-- **alerts**: Historia wysłanych alertów
+- **measurements**: Pomiary z sensora ADXL
 
-## Konfiguracja
 
-Domyślna konfiguracja MQTT brokera:
-- Host: `10.219.44.41`
-- Port: `1883`
+## Konfiguracja (.env)
 
-Aby zmienić konfigurację, edytuj zmienne w plikach:
-- `backend/main.py`: `MQTT_BROKER_HOST`, `MQTT_BROKER_PORT`
-- `backend/app.py`: `MQTT_BROKER_HOST`, `MQTT_BROKER_PORT`
+System nie przechowuje haseł ani adresów IP bezpośrednio w kodzie. Zamiast tego używa zmiennych środowiskowych.
 
-## Frontend
+Aby skonfigurować system:
 
-Frontend umożliwia:
-- Przeglądanie listy urządzeń
-- Wyświetlanie pomiarów dla wybranego urządzenia i typu sensora
-- Wysyłanie alertów do urządzeń (domyślnie "BUZZ" na topic `user/{mac_address}/alerts`)
+1.  W głównym katalogu projektu utwórz plik o nazwie **`.env`**.
+2.  Wklej do niego poniższą zawartość i pozamieniaj wartości:
 
-## Troubleshooting
+```ini
+# --- PLIK .ENV ---
 
-1. **Błąd połączenia z MQTT**: Upewnij się, że broker MQTT jest uruchomiony
-2. **CORS errors w przeglądarce**: Frontend musi być serwowany przez HTTP server (nie file://)
-3. **Baza danych**: Baza SQLite (`iot_data.db`) zostanie automatycznie utworzona przy pierwszym uruchomieniu
+SECRET_KEY=zmien_mnie_na_losowy_ciag_znakow_dla_bezpieczenstwa
+JWT_SECRET_KEY=zmien_mnie_na_losowy_ciag_znakow_dla_bezpieczenstwa
 
+MQTT_BROKER_HOST=localhost
+MQTT_BROKER_PORT=1883
+
+DATABASE_URL=sqlite:///iot_data.db
+```
+
+## Struktura Projektu
+
+```text
+/
+├── backend/                    # Logika serwera (Python/Flask)
+│   ├── app/                    # Główny pakiet aplikacji (MVC)
+│   │   ├── __init__.py         # Inicjalizacja aplikacji i bazy
+│   │   ├── models/             # Modele bazy danych (User, Device, Measurement)
+│   │   ├── controllers/        # Głowna logika
+│   │   ├── utils/              # Skrypty pomocnicze (wyswietlanie zawartosci bazy danych, symulacja urzadzen esp32)
+│   │   └── routes/             # Endpointy API
+│   ├── instance/               # Folder instancji (często tu zapisuje się baza .db)
+│   ├── config.py               # Plik konfiguracyjny Flaska
+│   ├── mqtt_worker.py          # Wątek nasłuchujący MQTT
+│   ├── run.py                  # Główny plik startowy serwera
+│   └── test_mqtt_connection.py # Skrypt pomocniczy do testowania połączenia
+│
+├── frontend/                   # Interfejs użytkownika (Klient)
+│   ├── index.html              # Główny plik HTML
+│   ├── app.js                  # Logika aplikacji (Wykresy, API, Auth)
+│   └── styles.css              # Style wyglądu strony
+│
+├── venv/                       # Wirtualne środowisko Python (biblioteki)
+├── .env                        # Konfiguracja (Hasła, IP - plik ukryty)
+├── .gitignore                  # Lista plików ignorowanych przez Git
+├── requirements.txt            # Lista wymaganych bibliotek
+└── README.md                   # Dokumentacja projektu

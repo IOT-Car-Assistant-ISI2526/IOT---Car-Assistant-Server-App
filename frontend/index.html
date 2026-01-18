@@ -3,62 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IOT Server - Dashboard</title>
+    <title>System IOT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+
+    <div id="authSection" class="container">
+        <div class="auth-container">
+            <h2 style="text-align: center; margin-bottom: 20px;">IOT Dashboard</h2>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">Logowanie</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">Rejestracja</button>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <input type="text" id="loginUsername" placeholder="Nazwa użytkownika" required>
+                <input type="password" id="loginPassword" placeholder="Hasło" required>
+                <button type="submit">Zaloguj się</button>
+            </form>
+
+            <form id="registerForm" class="auth-form hidden">
+                <input type="text" id="registerUsername" placeholder="Wybierz nazwę użytkownika" required>
+                <input type="password" id="registerPassword" placeholder="Hasło" required>
+                <input type="password" id="registerPasswordConfirm" placeholder="Powtórz hasło" required>
+                <button type="submit">Zarejestruj się</button>
+            </form>
+
+            <div id="authMessage" class="status-msg hidden"></div>
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="hidden">
         <header>
-            <h1>IOT Server Dashboard</h1>
-            <p class="subtitle">Monitorowanie urządzeń ESP32</p>
+            <div style="font-weight: bold; font-size: 1.4rem; color: #2563eb;">IOT System</div>
+            <div>
+                <span id="welcomeUser" style="margin-right: 15px; font-weight: 500;">Witaj</span>
+                <button onclick="handleLogout()" class="secondary" style="width: auto; padding: 8px 20px; margin: 0;">Wyloguj</button>
+            </div>
         </header>
 
-        <div class="content">
-            <section class="devices-section">
-                <h2>Urządzenia</h2>
-                <button id="refreshDevices" class="btn btn-primary">Odśwież listę</button>
-                <div id="devicesList" class="devices-grid">
-                    <p class="loading">Ładowanie urządzeń...</p>
+        <div class="container dashboard-grid">
+            
+            <div>
+                <div class="card">
+                    <h3>➕ Dodaj urządzenie</h3>
+                    <input type="text" id="claimMac" placeholder="Podaj adres MAC urządzenia">
+                    <button id="claimDeviceBtn">Przypisz do konta</button>
+                    <div id="claimStatus" class="status-msg hidden"></div>
                 </div>
-            </section>
 
-            <section class="alerts-section">
-                <h2>Wyślij Alert</h2>
-                <div class="alert-form">
-                    <div class="form-group">
-                        <label for="deviceMac">MAC Address urządzenia:</label>
-                        <input type="text" id="deviceMac" placeholder="np. aabbccddeeff" pattern="[a-fA-F0-9]{12}">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3>Moje Urządzenia</h3>
+                        <button id="refreshDevices" class="secondary" style="width: auto; padding: 5px 12px; font-size: 1.2em;">↻</button>
                     </div>
-                    <div class="form-group">
-                        <label for="alertMessage">Wiadomość alertu:</label>
-                        <input type="text" id="alertMessage" value="BUZZ" placeholder="BUZZ">
+                    <div id="devicesList">
+                        <p style="text-align: center; color: var(--text-muted);">Ładowanie...</p>
                     </div>
-                    <button id="sendAlert" class="btn btn-danger">Wyślij Alert</button>
                 </div>
-                <div id="alertStatus" class="status-message"></div>
-            </section>
+            </div>
 
-            <section class="measurements-section" id="measurementsSection" style="display: none;">
-                <h2>Pomiary</h2>
-                <div class="measurements-controls">
-                    <div class="form-group">
-                        <label for="sensorType">Typ sensora:</label>
-                        <select id="sensorType">
-                            <option value="adxl">ADXL</option>
-                            <option value="max_normal">MAX_NORMAL</option>
-                            <option value="max_profile">MAX_PROFILE</option>
-                        </select>
+            <div>
+                <div id="deviceDetailsSection" class="hidden">
+                    <div class="card" style="border-left: 5px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h2 id="selectedDeviceTitle" style="margin: 0; font-size: 1.5rem;">Urządzenie</h2>
+                                <p id="selectedDeviceMac" style="color: var(--text-muted); margin: 5px 0;">MAC: ...</p>
+                            </div>
+                            <button id="unbindDeviceBtn" class="danger" style="width: auto;">Usuń urządzenie</button>
+                        </div>
                     </div>
-                    <button id="loadMeasurements" class="btn btn-primary">Załaduj pomiary</button>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Wykresy Pomiary</h3>
+                            <button id="refreshMeasurements" class="secondary" style="width: auto;">Odśwież</button>
+                        </div>
+                        
+                        <div id="sensorTabs" class="sensor-tabs-container">
+                            </div>
+
+                        <div style="position: relative; height: 350px; width: 100%;">
+                            <canvas id="sensorChart"></canvas>
+                        </div>
+                        
+                        <div id="noDataMessage" class="hidden" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            Brak danych pomiarowych dla tego urządzenia.
+                        </div>
+                    </div>
                 </div>
-                <div id="measurementsList" class="measurements-table">
-                    <p>Wybierz urządzenie, aby zobaczyć pomiary</p>
+
+                <div id="emptyStateMessage" class="card" style="text-align: center; padding: 60px;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">👈</div>
+                    <h3>Wybierz urządzenie z listy</h3>
+                    <p style="color: var(--text-muted);">Kliknij na kafelek po lewej stronie, aby zobaczyć historię pomiarów.</p>
                 </div>
-            </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="color: var(--danger); margin-top: 0; font-size: 1.5rem;">⚠️ Strefa Niebezpieczna</h3>
+            <p>Czy na pewno chcesz usunąć urządzenie <b id="modalDeviceMac"></b>?</p>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
+                Tej operacji nie można cofnąć. Urządzenie zniknie z Twojego konta.
+                Aby potwierdzić, wpisz poniżej pełny adres MAC.
+            </p>
+            
+            <input type="text" id="deleteConfirmationInput" placeholder="Wpisz adres MAC tutaj" style="text-align: center; font-weight: bold; letter-spacing: 1px;">
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeDeleteModal()" class="secondary">Anuluj</button>
+                <button id="confirmDeleteBtn" onclick="confirmDelete()" class="danger" disabled>
+                    🗑️ Usuń urządzenie
+                </button>
+            </div>
         </div>
     </div>
 
     <script src="app.js"></script>
 </body>
 </html>
-
