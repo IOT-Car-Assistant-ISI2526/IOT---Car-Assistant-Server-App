@@ -31,6 +31,8 @@ pip install -r requirements.txt
 2. Upewnij się, że masz uruchomiony broker MQTT (domyślnie oczekiwany na `10.219.44.41:1883`):
 ```bash
 # Jeśli masz Mosquitto:
+cd C:\Program Files\mosquitto\
+# Lub inna ścieżka gdzie było ściągnięte
 mosquitto -v
 ```
 Zmień w kodzie ip na to na którym chodzi twój serwer Mosquitto.
