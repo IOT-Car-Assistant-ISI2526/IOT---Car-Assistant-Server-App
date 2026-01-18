@@ -32,8 +32,8 @@ pip install -r requirements.txt
 ```bash
 # Jeśli masz Mosquitto:
 mosquitto -v
-# Lub uruchom jako usługa systemowa
 ```
+Zmień w kodzie ip na to na którym chodzi twój serwer Mosquitto.
 
 ## Uruchomienie
 
