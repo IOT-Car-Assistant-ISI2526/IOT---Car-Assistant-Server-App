@@ -334,7 +334,7 @@ async function loadMeasurements() {
             }
             // Dodajemy na początek tablicy (unshift), żeby na wykresie czas szedł od lewej do prawej
             cachedMeasurements[m.sensor_type].unshift({
-                time: new Date(m.received_at).toLocaleTimeString('pl-PL'),
+                time: new Date(m.timestamp * 1000).toLocaleTimeString('pl-PL'),
                 value: parseFloat(m.value)
             });
         });

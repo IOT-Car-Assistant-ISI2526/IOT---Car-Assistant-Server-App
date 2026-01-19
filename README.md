@@ -52,13 +52,13 @@ python backend/run.py
 Serwer uruchomi się na porcie 5000 (API) i zacznie nasłuchiwać wiadomości MQTT.
 
 2. Otwórz frontend w przeglądarce:
-- Otwórz plik `frontend/index.html` w przeglądarce
-- Lub użyj prostego serwera HTTP:
+- Otwórz aplikacje react w przeglądarce
+
 ```bash
-# Python 3
 cd frontend
-python -m http.server 8000
-# Następnie otwórz http://localhost:8000
+npm install 
+npm run dev
+# Następnie otwórz http://localhost:5173/
 ```
 
 ## Format danych ESP32
