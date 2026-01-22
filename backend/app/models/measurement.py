@@ -10,6 +10,6 @@ class Measurement(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
     sensor_type = db.Column(db.String(50), nullable=False)
-    value = db.Column(db.String(50), nullable=False)
+    value = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
     received_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -55,17 +55,17 @@ class SimulatedESP32(threading.Thread):
             while self.running:
                 # 1. Symulacja ADXL
                 val_adxl = random.uniform(0.0, 5.0)
-                self.publish_measurement("adxl", val_adxl)
+                self.publish_measurement("ADXL345", val_adxl)
                 
                 # 2. Symulacja MAX_NORMAL
                 val_normal = random.uniform(20.0, 30.0)
-                self.publish_measurement("max_normal", val_normal)
+                self.publish_measurement("MAX6675_NORMAL", val_normal)
                 
                 # 3. Symulacja MAX_PROFILE
                 val_profile = random.uniform(100.0, 200.0)
-                self.publish_measurement("max_profile", val_profile)
+                self.publish_measurement("MAX6675_PROFILE", val_profile)
 
-                time.sleep(random.uniform(40, 60))
+                time.sleep(random.uniform(2, 3))
                 
         except Exception as e:
             print(f"[{self.mac}] ❌ Błąd wątku: {e}")

@@ -19,3 +19,21 @@ export interface AuthResponse {
   username: string;
   error?: string;
 }
+
+export interface EngineStats {
+  avg_temp: number;
+  max_temp: number;
+  is_overheating: boolean;
+}
+
+export interface SafetyStats {
+  score: number | null; 
+  harsh_events: number;
+  extreme_shocks: number;
+}
+
+export interface DashboardStatsData {
+  engine: EngineStats;
+  safety: SafetyStats;
+  total_measurements: number;
+}

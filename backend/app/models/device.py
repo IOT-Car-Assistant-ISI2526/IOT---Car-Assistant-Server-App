@@ -8,6 +8,8 @@ class Device(db.Model):
     mac_address = db.Column(db.String(17), unique=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
+    friendly_name = db.Column(db.String(50), nullable=True)
+    
     # Konfiguracja zdalna
     config_interval = db.Column(db.Integer, default=5000)
     config_threshold = db.Column(db.Float, default=25.0)

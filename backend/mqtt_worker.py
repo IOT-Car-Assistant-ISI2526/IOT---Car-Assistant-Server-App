@@ -3,6 +3,10 @@ from app import db
 from app.models.device import Device
 from app.models.measurement import Measurement
 
+SENSOR_TYPE = {"ADXL345": "adxl",
+               "MAX6675_NORMAL": "max_normal", 
+               "MAX6675_PROFILE": "max_profile"}
+
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print(f"📡 MQTT: Połączono z brokerem (Kod: {rc})")
@@ -26,6 +30,8 @@ def on_message(client, userdata, msg):
         
         mac_address = parts[1]
         sensor_type = parts[3]
+
+        sensor_type = SENSOR_TYPE[sensor_type]
         
         if payload == "hello": return
 
@@ -55,7 +61,7 @@ def on_message(client, userdata, msg):
                         user_id=current_owner_id,
                         sensor_type=sensor_type,
                         timestamp=int(ts_str),
-                        value=val_str
+                        value=float(val_str)
                     )
                     db.session.add(meas)
                     db.session.commit()
