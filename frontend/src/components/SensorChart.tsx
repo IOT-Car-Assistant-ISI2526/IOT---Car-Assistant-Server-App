@@ -80,7 +80,7 @@ export const SensorChart = ({ measurements }: Props) => {
   // Funkcja do określania etykiety osi Y na podstawie nazwy sensora
   const getYAxisLabel = (sensorName: string) => {
     if (sensorName.includes('max')) return 'Temperatura (°C)';
-    if (sensorName.includes('adxl')) return 'Przyspieszenie (G)';
+    if (sensorName.includes('adxl')) return 'Przyspieszenie (m²)';
     return 'Wartość';
   };
 

@@ -37,13 +37,13 @@ def analyze_acceleration(device_id, user_id, start_date, end_date):
         
         # Ostre manewry (1.25g - 2.5g)
         func.sum(case(
-            ((Measurement.value > 1.25) & (Measurement.value <= 2.5), 1), 
+            ((Measurement.value > 12.26) & (Measurement.value <= 24.52), 1), 
             else_=0
         )).label('harsh'),
 
         # Zderzenia / Wypadki (> 2.5g)
         func.sum(case(
-            (Measurement.value > 2.5, 1), 
+            (Measurement.value > 24.52, 1), 
             else_=0
         )).label('crash')
     ).filter(*filters).first()

@@ -131,7 +131,7 @@ function App() {
               style={{ background: currentView === 'dashboard' ? '#2563eb' : 'transparent', color: currentView === 'dashboard' ? 'white' : 'var(--text-muted)', width: 'auto', padding: '8px 16px', marginTop: 0 }}
               onClick={() => setCurrentView('dashboard')}
             >
-              Dashboard
+              Strona Głowna
             </button>
             <button 
               className={currentView === 'settings' ? 'secondary' : ''}
