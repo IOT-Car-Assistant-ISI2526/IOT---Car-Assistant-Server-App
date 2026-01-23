@@ -23,7 +23,7 @@ def analyze_acceleration(device_id, user_id, start_date, end_date):
     filters = [
         Measurement.device_id == device_id,
         Measurement.user_id == user_id,
-        Measurement.sensor_type == 'adxl',
+        Measurement.sensor_type == 'ADXL345',
         Measurement.timestamp >= int(start_date.timestamp()),
         Measurement.timestamp <= int(end_date.timestamp())
     ]
@@ -112,7 +112,7 @@ def analyze_engine_temperature(device_id, user_id, start_date, end_date, min_val
     filters = [
         Measurement.device_id == device_id,
         Measurement.user_id == user_id,
-        Measurement.sensor_type == 'max_normal',
+        Measurement.sensor_type == 'MAX6675_NORMAL',
         Measurement.timestamp >= int(start_date.timestamp()),
         Measurement.timestamp <= int(end_date.timestamp())
     ]

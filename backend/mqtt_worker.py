@@ -3,9 +3,9 @@ from app import db
 from app.models.device import Device
 from app.models.measurement import Measurement
 
-SENSOR_TYPE = {"ADXL345": "adxl",
-               "MAX6675_NORMAL": "max_normal", 
-               "MAX6675_PROFILE": "max_profile"}
+SENSOR_TYPE = {"ADXL345": "ADXL345",
+               "MAX6675_NORMAL": "MAX6675_NORMAL",
+               "MAX6675_PROFILE": "MAX6675_PROFILE"}
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
