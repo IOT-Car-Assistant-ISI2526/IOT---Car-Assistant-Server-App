@@ -20,7 +20,6 @@ def list_devices():
 def update_device_name_endpoint(mac_address):
     """
     Endpoint API: PUT /api/devices/<MAC>
-    Body: { "friendly_name": "Salon" }
     """
     current_user_id = get_jwt_identity()
     
@@ -61,19 +60,20 @@ def claim():
     current_user_id = get_jwt_identity()
     data = request.json
     
-    if not data or not data.get('mac_address'):
+    raw_mac = data.get('mac_address') or data.get('macAddress')
+    
+    if not raw_mac:
         return jsonify({"error": "Brak adresu MAC"}), 400
 
-    result = claim_device_logic(current_user_id, data['mac_address'])
+    result = claim_device_logic(current_user_id, raw_mac)
     
     if "error" in result:
-        # Jeśli błąd dotyczy kradzieży (zajęte konto), zwracamy kod 409 (Conflict)
         if "innego użytkownika" in result['error']:
             return jsonify(result), 409
-        # Inne błędy (np. nie znaleziono) -> 404
-        return jsonify(result), 404
+        return jsonify(result), 500
         
-    return jsonify(result), 200
+    status_code = 201 if result.get('status') == 'created' else 200
+    return jsonify(result), status_code
 
 @device_bp.route('/config', methods=['POST'])
 @jwt_required()

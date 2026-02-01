@@ -4,23 +4,19 @@ import { DeleteModal } from './DeleteModal';
 import { type Device } from '../types';
 
 interface Props {
-  onDeviceAdded: () => void;
+  onDeviceAdded: () => void; // Nazwa propsa została dla kompatybilności (odświeża menu)
 }
 
 export const Settings = ({ onDeviceAdded }: Props) => {
-  // --- STATE: DODAWANIE ---
-  const [claimMac, setClaimMac] = useState('');
-  const [status, setStatus] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // --- STATE: LISTA I USUWANIE ---
   const [devices, setDevices] = useState<Device[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [deviceToDelete, setDeviceToDelete] = useState<string | null>(null);
+  const [status, setStatus] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
 
-  // --- STATE: EDYCJA NAZWY (NOWE) ---
-  const [editingMac, setEditingMac] = useState<string | null>(null); // Który MAC edytujemy?
-  const [tempName, setTempName] = useState(''); // Tekst wpisywany w input
+  // --- STATE: EDYCJA NAZWY ---
+  const [editingMac, setEditingMac] = useState<string | null>(null);
+  const [tempName, setTempName] = useState('');
 
   // 1. Pobieranie listy urządzeń
   const fetchDevices = useCallback(async () => {
@@ -40,36 +36,7 @@ export const Settings = ({ onDeviceAdded }: Props) => {
     fetchDevices();
   }, [fetchDevices]);
 
-  // 2. Obsługa Dodawania (CLAIM)
-  const handleClaimDevice = async () => {
-    if (!claimMac.trim()) return;
-    setIsSubmitting(true);
-    setStatus(null);
-
-    try {
-      const res = await apiFetch('/devices/claim', {
-        method: 'POST',
-        body: JSON.stringify({ mac_address: claimMac })
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setStatus({ msg: data.message, type: 'success' });
-        setClaimMac('');
-        fetchDevices(); 
-        onDeviceAdded();
-      } else {
-        setStatus({ msg: data.error || 'Błąd dodawania', type: 'error' });
-      }
-    } catch (e) {
-      setStatus({ msg: 'Błąd połączenia', type: 'error' });
-    } finally {
-      setIsSubmitting(false);
-      setTimeout(() => setStatus(null), 5000);
-    }
-  };
-
-  // 3. Obsługa Usuwania (DELETE)
+  // 2. Obsługa Usuwania (DELETE)
   const confirmDelete = async () => {
     if (!deviceToDelete) return;
     try {
@@ -77,8 +44,9 @@ export const Settings = ({ onDeviceAdded }: Props) => {
       if (res.ok) {
         setDeviceToDelete(null);
         fetchDevices();
-        onDeviceAdded();
+        onDeviceAdded(); // Odśwież widok w rodzicu
         setStatus({ msg: 'Urządzenie usunięte.', type: 'success' });
+        setTimeout(() => setStatus(null), 3000);
       } else {
         alert('Nie udało się usunąć urządzenia.');
       }
@@ -87,11 +55,10 @@ export const Settings = ({ onDeviceAdded }: Props) => {
     }
   };
 
-  // --- 4. OBSŁUGA EDYCJI NAZWY (NOWE) ---
-
+  // 3. OBSŁUGA EDYCJI NAZWY
   const startEditing = (device: Device) => {
     setEditingMac(device.mac_address);
-    setTempName(device.friendly_name || ''); // Wstaw obecną nazwę do inputa
+    setTempName(device.friendly_name || '');
   };
 
   const cancelEditing = () => {
@@ -108,9 +75,8 @@ export const Settings = ({ onDeviceAdded }: Props) => {
       });
 
       if (res.ok) {
-        // Sukces: odświeżamy listę i zamykamy tryb edycji
         await fetchDevices();
-        onDeviceAdded(); // Odśwież też w App (menu boczne)
+        onDeviceAdded();
         setEditingMac(null);
       } else {
         const err = await res.json();
@@ -125,37 +91,13 @@ export const Settings = ({ onDeviceAdded }: Props) => {
     <div className="container" style={{ maxWidth: '800px' }}>
       <h2 style={{ marginBottom: '20px' }}>Ustawienia Systemu</h2>
 
-      {/* --- KARTA 1: DODAWANIE --- */}
-      <div className="card" style={{ marginBottom: '30px' }}>
-        <h3>Dodaj nowe urządzenie</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9em', marginBottom: '15px' }}>
-          Wpisz adres MAC urządzenia, które chcesz przypisać.
-        </p>
-        
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            value={claimMac}
-            onChange={e => setClaimMac(e.target.value)}
-            style={{ margin: 0 }}
-          />
-          <button 
-            onClick={handleClaimDevice} 
-            disabled={isSubmitting || !claimMac}
-            style={{ width: 'auto', marginTop: 0, whiteSpace: 'nowrap' }}
-          >
-            {isSubmitting ? 'Dodawanie...' : 'Przypisz'}
-          </button>
+      {status && (
+        <div className={`status-msg ${status.type}`} style={{ marginBottom: '20px' }}>
+          {status.msg}
         </div>
+      )}
 
-        {status && (
-          <div className={`status-msg ${status.type}`} style={{ marginTop: '15px' }}>
-            {status.msg}
-          </div>
-        )}
-      </div>
-
-      {/* --- KARTA 2: LISTA I ZARZĄDZANIE --- */}
+      {/* --- LISTA I ZARZĄDZANIE --- */}
       <div className="card">
         <h3>Moje Urządzenia:</h3>
 

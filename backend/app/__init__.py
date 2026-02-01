@@ -16,11 +16,9 @@ def create_app():
     CORS(app)
 
     with app.app_context():
-        # Import modeli przed utworzeniem tabel
         from app.models import user, device, measurement
         db.create_all()
 
-    # Rejestracja Blueprintów
     from app.routes.auth_routes import auth_bp
     from app.routes.device_routes import device_bp
     from app.routes.stats_routes import stats_bp

@@ -18,7 +18,6 @@ def login_logic(username, password):
     user = User.query.filter_by(username=username).first()
     
     if user and check_password_hash(user.password_hash, password):
-        # Identity w tokenie to ID użytkownika (jako string)
         token = create_access_token(identity=str(user.id))
         return {"access_token": token, "user_id": user.id, "username": user.username}, 200
         

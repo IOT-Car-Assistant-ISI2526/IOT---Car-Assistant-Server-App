@@ -3,10 +3,6 @@ from app import db
 from app.models.device import Device
 from app.models.measurement import Measurement
 
-SENSOR_TYPE = {"ADXL345": "ADXL345",
-               "MAX6675_NORMAL": "MAX6675_NORMAL",
-               "MAX6675_PROFILE": "MAX6675_PROFILE"}
-
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print(f"📡 MQTT: Połączono z brokerem (Kod: {rc})")
@@ -30,21 +26,17 @@ def on_message(client, userdata, msg):
         
         mac_address = parts[1]
         sensor_type = parts[3]
-
-        sensor_type = SENSOR_TYPE[sensor_type]
         
         if payload == "hello": return
 
         print(f"📨 MQTT Data: {mac_address} [{sensor_type}] -> {payload}")
 
-        # WAŻNE: Otwieramy kontekst aplikacji, aby mieć dostęp do bazy danych
         with app.app_context():
             # 1. Urządzenie
             device = Device.query.filter_by(mac_address=mac_address).first()
             if not device:
-                device = Device(mac_address=mac_address)
-                db.session.add(device)
-                db.session.commit()
+                print(f"MQTT: Nieznane urządzenie: {mac_address}")
+                return
             
             # 2. Aktualizacja czasu
             device.last_seen = db.func.now()
